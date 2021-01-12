@@ -82,13 +82,6 @@ export const ServerOptions: Definitions<ServerConfig> = {
     defaultDescription: "'/rpc/v0' for Filecoin, '/' otherwise",
     cliType: "string"
   },
-  rpcEndpoint: {
-    normalize,
-    shortDescription:
-      "Defines the endpoint route the HTTP and WebSocket servers will listen on.",
-    default: () => "/",
-    defaultDescription: "'/rpc/v0' for Filecoin, '/' otherwise"
-  },
   keepAliveTimeout: {
     normalize: () => {
       throw new Error("`keepAliveTimeout` was removed in v3");
