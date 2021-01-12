@@ -6,6 +6,7 @@ import {
   FilecoinFlavorName
 } from "@ganache/flavors";
 import { Definitions } from "@ganache/options";
+import { serverDefaults } from "@ganache/core";
 
 const COLORS = {
   Bold: "\x1b[1m",
@@ -13,6 +14,65 @@ const COLORS = {
   FgRed: "\x1b[31m",
   FgYellow: "\x1b[33m"
 };
+
+function processOption(
+  category: string,
+  option: string,
+  optionObj: Definitions<any>[string | number],
+  argv: yargs.Argv
+) {
+  if (optionObj.disableInCLI !== true) {
+    const group = `${category.charAt(0).toUpperCase()}${category.substr(1)}:`;
+
+    const useAliases = typeof optionObj.cliAliases !== "undefined";
+    const alias = useAliases
+      ? optionObj.cliAliases
+      : (optionObj as any).legacyName;
+
+    let description = optionObj.shortDescription;
+    if (
+      alias &&
+      (!Array.isArray(alias) || alias.filter(a => a.length > 1).length > 0)
+    ) {
+      description = `${description}\n${COLORS.Bold}${
+        COLORS.FgYellow
+      }Deprecated aliases: ${
+        Array.isArray(alias)
+          ? alias.filter(a => a.length > 1).join(", ")
+          : alias
+      }${COLORS.Reset}\n`;
+    }
+
+    let defaultValue;
+    try {
+      const defaultGetter = (optionObj as any).default;
+      if (defaultGetter && defaultGetter.length > 0) {
+        defaultValue = defaultGetter();
+      }
+    } catch (e) {}
+    if (optionObj.cliType === "array" && !Array.isArray(defaultValue)) {
+      // if we pass `default: undefined`, yargs will return `[ undefined ]`
+      // this just explicitly fixes array types
+
+      if (typeof defaultValue === "undefined") {
+        defaultValue = [];
+      } else {
+        defaultValue = [defaultValue];
+      }
+    }
+
+    argv = argv.option(`${category}.${option}`, {
+      group,
+      description,
+      alias,
+      default: defaultValue,
+      defaultDescription: (optionObj as any).defaultDescription,
+      type: optionObj.cliChoices ? undefined : optionObj.cliType,
+      choices: optionObj.cliChoices,
+      coerce: optionObj.normalize
+    });
+  }
+}
 
 export default function (version: string, isDocker: boolean) {
   let args = yargs.strict();
@@ -43,73 +103,29 @@ export default function (version: string, isDocker: boolean) {
             hidden: true
           });
 
-          const group = `${category.charAt(0).toUpperCase()}${category.substr(
-            1
-          )}:`;
           const categoryObj = flavorDefaults[category] as Definitions<any>;
           const options = Object.keys(categoryObj);
           for (const option of options) {
             const optionObj = categoryObj[option];
-            if (optionObj.disableInCLI !== true) {
-              const useAliases = typeof optionObj.cliAliases !== "undefined";
-              const alias = useAliases
-                ? optionObj.cliAliases
-                : (optionObj as any).legacyName;
-
-              let description = optionObj.shortDescription;
-              if (
-                alias &&
-                (!Array.isArray(alias) ||
-                  alias.filter(a => a.length > 1).length > 0)
-              ) {
-                description = `${description}\n${COLORS.Bold}${
-                  COLORS.FgYellow
-                }Deprecated aliases: ${
-                  Array.isArray(alias)
-                    ? alias.filter(a => a.length > 1).join(", ")
-                    : alias
-                }${COLORS.Reset}\n`;
-              }
-
-              let defaultValue;
-              try {
-                const defaultGetter = (optionObj as any).default;
-                if (defaultGetter && defaultGetter.length > 0) {
-                  defaultValue = defaultGetter();
-                }
-              } catch (e) {}
-              if (
-                optionObj.cliType === "array" &&
-                !Array.isArray(defaultValue)
-              ) {
-                // if we pass `default: undefined`, yargs will return `[ undefined ]`
-                // this just explicitly fixes array types
-
-                if (typeof defaultValue === "undefined") {
-                  defaultValue = [];
-                } else {
-                  defaultValue = [defaultValue];
-                }
-              }
-
-              flavorArgs = flavorArgs.option(`${category}.${option}`, {
-                group,
-                description,
-                alias,
-                default: defaultValue,
-                defaultDescription: (optionObj as any).defaultDescription,
-                type: optionObj.cliChoices ? undefined : optionObj.cliType,
-                choices: optionObj.cliChoices,
-                coerce: optionObj.normalize
-              });
-            }
+            processOption(category, option, optionObj, flavorArgs);
           }
         }
 
+        flavorArgs = flavorArgs.option("server", { hidden: true });
+
+        const categoryObj = serverDefaults.server;
+        const options = Object.keys(categoryObj);
+        for (const option of options) {
+          const optionObj = categoryObj[option];
+
+          if (option === "rpcEndpoint" && flavor === FilecoinFlavorName) {
+            optionObj.default = () => "/rpc/v0";
+          }
+
+          processOption("server", option, optionObj, flavorArgs);
+        }
+
         flavorArgs = flavorArgs
-          .option("server", {
-            hidden: true
-          })
           .option("server.host", {
             group: "Server:",
             description: `Hostname to listen on.\n${COLORS.Bold}${COLORS.FgYellow}Deprecated aliases: host, hostname${COLORS.Reset}\n`,

@@ -33,6 +33,16 @@ export type ServerConfig = {
     };
 
     /**
+     * Defines the endpoint route the HTTP and WebSocket servers will listen on.
+     *
+     * @default "/"
+     */
+    readonly rpcEndpoint: {
+      type: string;
+      hasDefault: true;
+    };
+
+    /**
      * @obsolete Option removed in v3
      */
     readonly keepAliveTimeout: {
@@ -60,6 +70,13 @@ export const ServerOptions: Definitions<ServerConfig> = {
     shortDescription:
       "Whether or not websockets should response with binary data (ArrayBuffers) or strings.",
     default: () => "auto"
+  },
+  rpcEndpoint: {
+    normalize,
+    shortDescription:
+      "Defines the endpoint route the HTTP and WebSocket servers will listen on.",
+    default: () => "/",
+    defaultDescription: "'/rpc/v0' for Filecoin, '/' otherwise"
   },
   keepAliveTimeout: {
     normalize: () => {
