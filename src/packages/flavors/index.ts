@@ -1,20 +1,26 @@
 import * as Ethereum from "@ganache/ethereum";
 import { ethereumDefaults } from "@ganache/ethereum-options";
+import * as Filecoin from "@ganache/filecoin";
+import { filecoinDefaults } from "@ganache/filecoin-options";
 
 export const EthereumFlavorName = "ethereum";
+export const FilecoinFlavorName = "filecoin";
 
 export const DefaultFlavor = EthereumFlavorName;
 
 export const DefaultOptionsByName: any = {
-  [EthereumFlavorName]: ethereumDefaults
+  [EthereumFlavorName]: ethereumDefaults,
+  [FilecoinFlavorName]: filecoinDefaults
 };
 
 export type ConnectorsByName = {
   [EthereumFlavorName]: Ethereum.Connector;
+  [FilecoinFlavorName]: Filecoin.Connector;
 };
 
 export const ConnectorsByName = {
-  [EthereumFlavorName]: Ethereum.Connector
+  [EthereumFlavorName]: Ethereum.Connector,
+  [FilecoinFlavorName]: Filecoin.Connector
 };
 
 export type FlavorName = keyof ConnectorsByName;
@@ -23,10 +29,14 @@ export type Connector = {
   [K in keyof ConnectorsByName]: ConnectorsByName[K];
 }[keyof ConnectorsByName];
 
-export type Providers = Ethereum.Provider;
+export type Providers = Ethereum.Provider | Filecoin.Provider;
 
 type EthereumOptions = {
   flavor?: typeof EthereumFlavorName;
 } & Ethereum.ProviderOptions;
 
-export type Options = EthereumOptions;
+type FilecoinOptions = {
+  flavor?: typeof FilecoinFlavorName;
+} & Filecoin.ProviderOptions;
+
+export type Options = EthereumOptions | FilecoinOptions;

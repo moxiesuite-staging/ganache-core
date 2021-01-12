@@ -6,9 +6,13 @@ import args from "./args";
 import {
   DefaultFlavor,
   FlavorName,
-  EthereumFlavorName
+  EthereumFlavorName,
+  FilecoinFlavorName
 } from "@ganache/flavors";
 import initializeEthereum from "./initialize/ethereum";
+import initializeFilecoin from "./initialize/filecoin";
+import { Provider as FilecoinProvider } from "@ganache/filecoin";
+import { Provider as EthereumProvider } from "@ganache/ethereum";
 
 const { version: ganacheVersion } = $INLINE_JSON("../../core/package.json");
 const { version } = $INLINE_JSON("../package.json");
@@ -88,9 +92,13 @@ async function startGanache(err) {
   started = true;
 
   switch (flavor) {
+    case FilecoinFlavorName: {
+      initializeFilecoin(server.provider as FilecoinProvider, serverSettings);
+      break;
+    }
     case EthereumFlavorName:
     default: {
-      initializeEthereum(server.provider, serverSettings);
+      initializeEthereum(server.provider as EthereumProvider, serverSettings);
       break;
     }
   }

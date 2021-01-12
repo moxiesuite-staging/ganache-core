@@ -2,7 +2,8 @@ import yargs from "yargs";
 import {
   DefaultFlavor,
   DefaultOptionsByName,
-  EthereumFlavorName
+  EthereumFlavorName,
+  FilecoinFlavorName
 } from "@ganache/flavors";
 import { Definitions } from "@ganache/options";
 
@@ -20,6 +21,10 @@ export default function (version: string, isDocker: boolean) {
     const commandAliases = flavor === DefaultFlavor ? ["$0", flavor] : flavor;
     let defaultPort: number;
     switch (flavor) {
+      case FilecoinFlavorName: {
+        defaultPort = 7777;
+        break;
+      }
       case EthereumFlavorName:
       default: {
         defaultPort = 8545;
