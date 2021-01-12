@@ -57,7 +57,11 @@ export default function (version: string, isDocker: boolean) {
                 : (optionObj as any).legacyName;
 
               let description = optionObj.shortDescription;
-              if (alias && alias.filter(a => a.length > 1).length > 0) {
+              if (
+                alias &&
+                (!Array.isArray(alias) ||
+                  alias.filter(a => a.length > 1).length > 0)
+              ) {
                 description = `${description}\n${COLORS.Bold}${
                   COLORS.FgYellow
                 }Deprecated aliases: ${
