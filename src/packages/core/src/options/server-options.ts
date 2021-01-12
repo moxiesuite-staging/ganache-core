@@ -63,13 +63,24 @@ export const ServerOptions: Definitions<ServerConfig> = {
     normalize,
     shortDescription: "Enable a websocket server.",
     default: () => true,
-    legacyName: "ws"
+    legacyName: "ws",
+    cliType: "boolean",
+    cliAliases: []
   },
   wsBinary: {
     normalize,
     shortDescription:
       "Whether or not websockets should response with binary data (ArrayBuffers) or strings.",
-    default: () => "auto"
+    default: () => "auto",
+    cliChoices: [true, false, "auto"] as any[]
+  },
+  rpcEndpoint: {
+    normalize,
+    shortDescription:
+      "Defines the endpoint route the HTTP and WebSocket servers will listen on.",
+    default: () => "/",
+    defaultDescription: "'/rpc/v0' for Filecoin, '/' otherwise",
+    cliType: "string"
   },
   rpcEndpoint: {
     normalize,
