@@ -81,7 +81,7 @@ export default class Blockchain extends Emittery.Typed<
 
     setTimeout(async () => {
       // Create the IPFS server
-      this.ipfsServer = new IPFSServer(this.options.chain.ipfsPort);
+      this.ipfsServer = new IPFSServer(this.options.chain);
 
       await this.ipfsServer.start();
 
